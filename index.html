@@ -814,18 +814,15 @@
     </div>
 
     <script>
-        // ENHANCED DATABASE SYSTEM FOR MULTI-DEVICE SUPPORT
+        // SHARED DATABASE SYSTEM FOR MULTI-USER ENVIRONMENT
         const DB_KEYS = {
             USERS: 'skillsync_shared_users',
             SKILLS: 'skillsync_shared_skills', 
-            MANAGER_RECS: 'skillsync_shared_manager_recs',
-            SYNC_TIMESTAMP: 'skillsync_last_sync'
+            MANAGER_RECS: 'skillsync_shared_manager_recs'
         };
 
-        // Initialize shared database
+        // Initialize shared database - This creates a common dataset for all users
         function initializeSharedDatabase() {
-            const now = new Date().toISOString();
-            
             // Only initialize if no data exists
             if (!localStorage.getItem(DB_KEYS.USERS)) {
                 const defaultUsers = {
@@ -834,28 +831,25 @@
                         email: 'employee1@company.com',
                         role: 'employee',
                         name: 'John Employee',
-                        manager: 'manager1',
-                        deviceId: generateDeviceId()
+                        manager: 'manager1'
                     },
                     'manager1': {
                         password: 'password123',
                         email: 'manager1@company.com',
                         role: 'manager',
                         name: 'Sarah Manager',
-                        subordinates: ['employee1'],
-                        deviceId: generateDeviceId()
+                        subordinates: ['employee1']
                     },
                     'employee2': {
                         password: 'password123',
                         email: 'employee2@company.com',
                         role: 'employee',
                         name: 'Emma Developer',
-                        manager: 'manager1',
-                        deviceId: generateDeviceId()
+                        manager: 'manager1'
                     }
                 };
                 localStorage.setItem(DB_KEYS.USERS, JSON.stringify(defaultUsers));
-                console.log('Default users created for multi-device support');
+                console.log('Default shared users created');
             }
 
             if (!localStorage.getItem(DB_KEYS.SKILLS)) {
@@ -894,36 +888,17 @@
                 };
                 localStorage.setItem(DB_KEYS.MANAGER_RECS, JSON.stringify(defaultRecs));
             }
-
-            // Set sync timestamp
-            localStorage.setItem(DB_KEYS.SYNC_TIMESTAMP, now);
         }
 
-        // Generate unique device ID for tracking
-        function generateDeviceId() {
-            let deviceId = localStorage.getItem('skillsync_device_id');
-            if (!deviceId) {
-                deviceId = 'device_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-                localStorage.setItem('skillsync_device_id', deviceId);
-            }
-            return deviceId;
-        }
-
-        // Enhanced database functions with device tracking
+        // Enhanced database functions - All users share the same data
         function getUsers() {
             return JSON.parse(localStorage.getItem(DB_KEYS.USERS)) || {};
         }
 
         function saveUsers(users) {
-            // Add device info to track who made changes
-            const currentDevice = localStorage.getItem('skillsync_device_id');
-            if (currentDevice && users[currentUser]) {
-                users[currentUser].lastUpdatedBy = currentDevice;
-                users[currentUser].lastUpdated = new Date().toISOString();
-            }
-            
             localStorage.setItem(DB_KEYS.USERS, JSON.stringify(users));
-            localStorage.setItem(DB_KEYS.SYNC_TIMESTAMP, new Date().toISOString());
+            // Auto-refresh manager dropdowns across all sessions
+            refreshManagerDropdowns();
         }
 
         function getSkills() {
@@ -932,7 +907,6 @@
 
         function saveSkills(skills) {
             localStorage.setItem(DB_KEYS.SKILLS, JSON.stringify(skills));
-            localStorage.setItem(DB_KEYS.SYNC_TIMESTAMP, new Date().toISOString());
         }
 
         function getManagerRecs() {
@@ -941,148 +915,96 @@
 
         function saveManagerRecs(recs) {
             localStorage.setItem(DB_KEYS.MANAGER_RECS, JSON.stringify(recs));
-            localStorage.setItem(DB_KEYS.SYNC_TIMESTAMP, new Date().toISOString());
         }
 
-        // MANUAL SYNC FUNCTION - Add this to help sync between devices
-        function manualSyncData() {
-            const syncData = {
-                users: getUsers(),
-                skills: getSkills(),
-                managerRecs: getManagerRecs(),
-                timestamp: new Date().toISOString(),
-                deviceId: localStorage.getItem('skillsync_device_id')
-            };
+        // Auto-refresh manager dropdowns whenever users change
+        function refreshManagerDropdowns() {
+            const users = getUsers();
             
-            // Show sync data that can be shared between devices
-            const syncString = JSON.stringify(syncData);
-            alert('SYNC DATA - Copy this and share with other devices:\n\n' + 
-                  'To import on another device, use the Import Sync Data button.\n\n' +
-                  'Current data snapshot created.');
-            
-            console.log('Sync Data:', syncData);
-            return syncString;
-        }
-
-        // IMPORT SYNC FUNCTION - Add this to receive data from other devices
-        function importSyncData(syncDataString) {
-            try {
-                const syncData = JSON.parse(syncDataString);
+            // Refresh registration manager dropdown
+            const managerSelect = document.getElementById('reg-manager');
+            if (managerSelect) {
+                const currentValue = managerSelect.value;
+                managerSelect.innerHTML = '<option value="">Select your manager</option>';
                 
-                if (syncData.users) {
-                    localStorage.setItem(DB_KEYS.USERS, JSON.stringify(syncData.users));
-                }
-                if (syncData.skills) {
-                    localStorage.setItem(DB_KEYS.SKILLS, JSON.stringify(syncData.skills));
-                }
-                if (syncData.managerRecs) {
-                    localStorage.setItem(DB_KEYS.MANAGER_RECS, JSON.stringify(syncData.managerRecs));
-                }
-                
-                localStorage.setItem(DB_KEYS.SYNC_TIMESTAMP, syncData.timestamp || new Date().toISOString());
-                
-                alert('Data imported successfully! Page will reload to show updated data.');
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
-                
-            } catch (error) {
-                alert('Error importing data: ' + error.message);
-            }
-        }
-
-        // Add sync buttons to the interface
-        function addSyncButtons() {
-            // Add to employee dashboard
-            const employeeSidebar = document.querySelector('.employee-view .sidebar-menu');
-            if (employeeSidebar) {
-                const syncLi = document.createElement('li');
-                syncLi.innerHTML = `
-                    <a href="#" id="sync-data-btn"><i class="fas fa-sync-alt"></i> Sync Data</a>
-                `;
-                employeeSidebar.appendChild(syncLi);
-                
-                document.getElementById('sync-data-btn').addEventListener('click', function(e) {
-                    e.preventDefault();
-                    showSyncDialog();
+                Object.keys(users).forEach(username => {
+                    if (users[username].role === 'manager') {
+                        const option = document.createElement('option');
+                        option.value = username;
+                        option.textContent = users[username].name;
+                        managerSelect.appendChild(option);
+                    }
                 });
+                
+                // Restore previous selection if still valid
+                if (currentValue && users[currentValue]) {
+                    managerSelect.value = currentValue;
+                }
             }
             
-            // Add to manager dashboard  
-            const managerSidebar = document.querySelector('.manager-view .sidebar-menu');
-            if (managerSidebar) {
-                const syncLi = document.createElement('li');
-                syncLi.innerHTML = `
-                    <a href="#" id="sync-data-btn-manager"><i class="fas fa-sync-alt"></i> Sync Data</a>
-                `;
-                managerSidebar.appendChild(syncLi);
+            // Refresh manager dashboard dropdowns
+            refreshManagerDashboardDropdowns();
+        }
+
+        // Refresh manager dashboard dropdowns with current team members
+        function refreshManagerDashboardDropdowns() {
+            if (!currentUser) return;
+            
+            const users = getUsers();
+            const currentUserData = users[currentUser];
+            
+            if (currentUserData && currentUserData.role === 'manager') {
+                const teamMembers = currentUserData.subordinates || [];
                 
-                document.getElementById('sync-data-btn-manager').addEventListener('click', function(e) {
-                    e.preventDefault();
-                    showSyncDialog();
+                const memberSelects = [
+                    'team-member-select',
+                    'coaching-member-select', 
+                    'ojt-member-select'
+                ];
+                
+                memberSelects.forEach(selectId => {
+                    const select = document.getElementById(selectId);
+                    if (select) {
+                        const currentValue = select.value;
+                        select.innerHTML = '<option value="">Select a team member</option>';
+                        
+                        teamMembers.forEach(memberId => {
+                            const member = users[memberId];
+                            if (member) {
+                                const option = document.createElement('option');
+                                option.value = memberId;
+                                option.textContent = member.name;
+                                select.appendChild(option);
+                            }
+                        });
+                        
+                        // Restore previous selection if still valid
+                        if (currentValue && teamMembers.includes(currentValue)) {
+                            select.value = currentValue;
+                        }
+                    }
                 });
             }
         }
 
-        function showSyncDialog() {
-            const syncData = manualSyncData();
-            
-            const dialog = `
-                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;">
-                    <div style="background: white; padding: 20px; border-radius: 10px; max-width: 500px; width: 90%;">
-                        <h3>Data Sync</h3>
-                        <p><strong>Export Data:</strong> Copy the data below and share it with other devices:</p>
-                        <textarea id="sync-data-output" style="width: 100%; height: 100px; margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" readonly>${syncData}</textarea>
-                        <button onclick="copySyncData()" style="background: #4361ee; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
-                            <i class="fas fa-copy"></i> Copy Data
-                        </button>
-                        
-                        <hr style="margin: 20px 0;">
-                        
-                        <p><strong>Import Data:</strong> Paste data from another device below:</p>
-                        <textarea id="sync-data-input" style="width: 100%; height: 100px; margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" placeholder="Paste sync data here..."></textarea>
-                        <button onclick="importSyncData(document.getElementById('sync-data-input').value)" style="background: #2ecc71; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
-                            <i class="fas fa-download"></i> Import Data
-                        </button>
-                        
-                        <button onclick="this.parentElement.parentElement.remove()" style="background: #e74c3c; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.insertAdjacentHTML('beforeend', dialog);
-        }
-
-        function copySyncData() {
-            const textarea = document.getElementById('sync-data-output');
-            textarea.select();
-            document.execCommand('copy');
-            alert('Data copied to clipboard! Share this with other devices.');
-        }
-
-        // ENHANCED REGISTRATION - Better multi-device support
+        // Enhanced registration - adds user to shared database
         function enhancedRegistration(username, email, fullName, password, manager) {
             const users = getUsers();
             
-            // Create user with device tracking
+            // Create user in shared database
             users[username] = {
                 password: password,
                 email: email,
                 role: currentUserType,
                 name: fullName,
-                deviceId: generateDeviceId(),
-                created: new Date().toISOString(),
-                lastUpdated: new Date().toISOString(),
-                lastUpdatedBy: localStorage.getItem('skillsync_device_id')
+                created: new Date().toISOString()
             };
             
             // Add manager relationship for employees
             if (currentUserType === 'employee' && manager) {
                 users[username].manager = manager;
                 
-                // Add to manager's subordinates list
+                // Add to manager's subordinates list in shared database
                 if (users[manager]) {
                     if (!users[manager].subordinates) {
                         users[manager].subordinates = [];
@@ -1097,7 +1019,7 @@
             
             saveUsers(users);
             
-            // Initialize skills database for new user
+            // Initialize skills database for new user in shared storage
             const skills = getSkills();
             skills[username] = {
                 jobSkills: { technical: [], soft: [] },
@@ -1110,7 +1032,7 @@
             return users[username];
         }
 
-        // MODIFIED LOGIN - Better error reporting
+        // Enhanced login - uses shared database
         function enhancedLogin(username, password) {
             const users = getUsers();
             const user = users[username];
@@ -1151,12 +1073,9 @@
         let currentUser = null;
         let currentUserType = 'employee';
 
-        // Initialize the application with enhanced database
+        // Initialize the application with shared database
         initializeSharedDatabase();
         populateManagerDropdown();
-
-        // Add sync buttons after page loads
-        setTimeout(addSyncButtons, 1000);
 
         // Populate manager dropdown in registration
         function populateManagerDropdown() {
@@ -2396,11 +2315,6 @@
         document.getElementById('print-team-report').addEventListener('click', () => {
             window.print();
         });
-
-        // Make functions globally available for the sync dialog
-        window.manualSyncData = manualSyncData;
-        window.importSyncData = importSyncData;
-        window.copySyncData = copySyncData;
     </script>
 </body>
 </html>
