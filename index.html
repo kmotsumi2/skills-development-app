@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSync - Training & Development</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --info: #4895ef;
+            --warning: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --employee: #7209b7;
+            --manager: #f72585;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .app-header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .app-header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .app-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .login-container, .register-container {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5ee;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-warning {
+            background-color: #e67e22;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #d35400;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .user-type-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .user-type-btn {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid #e1e5ee;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .user-type-btn.active {
+            border-color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+        
+        .app-content {
+            display: none;
+            padding: 20px;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 20px;
+        }
+        
+        .sidebar {
+            background-color: var(--light);
+            border-radius: var(--border-radius);
+            padding: 20px;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .sidebar-menu a {
+            display: block;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: var(--dark);
+            border-radius: var(--border-radius);
+            transition: all 0.3s;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .main-content {
+            background-color: var(--light);
+            border-radius: var(--border-radius);
+            padding: 25px;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+        }
+        
+        .skill-category {
+            margin-bottom: 30px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+        
+        .skill-category h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .skill-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e1e5ee;
+        }
+        
+        .skill-item:last-child {
+            border-bottom: none;
+        }
+        
+        .skill-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e1e5ee;
+            border-radius: var(--border-radius);
+            margin-right: 10px;
+        }
+        
+        .skill-select {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e1e5ee;
+            border-radius: var(--border-radius);
+            margin-right: 10px;
+            background-color: white;
+        }
+        
+        .skill-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        
+        .btn-add {
+            background-color: var(--success);
+            color: white;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .save-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        .report-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+        }
+        
+        .report-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .report-section {
+            margin-bottom: 25px;
+        }
+        
+        .report-section h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e1e5ee;
+        }
+        
+        .report-item {
+            padding: 10px 0;
+            border-bottom: 1px dashed #e1e5ee;
+        }
+        
+        .report-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .auth-toggle {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .auth-toggle a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .auth-toggle a:hover {
+            text-decoration: underline;
+        }
+        
+        .message {
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .message.error {
+            background-color: #ffe6e6;
+            color: #d63031;
+            border: 1px solid #ff7675;
+        }
+        
+        .message.success {
+            background-color: #e6f7e6;
+            color: #27ae60;
+            border: 1px solid #58d68d;
+        }
+        
+        .employee-view .sidebar-menu a:hover, 
+        .employee-view .sidebar-menu a.active {
+            background-color: var(--employee);
+        }
+        
+        .manager-view .sidebar-menu a:hover, 
+        .manager-view .sidebar-menu a.active {
+            background-color: var(--manager);
+        }
+        
+        .priority-select {
+            width: 120px;
+            padding: 8px;
+            border: 1px solid #e1e5ee;
+            border-radius: var(--border-radius);
+        }
+        
+        .priority-high { color: #e74c3c; font-weight: bold; }
+        .priority-medium { color: #f39c12; font-weight: bold; }
+        .priority-low { color: #27ae60; font-weight: bold; }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                order: 2;
+            }
+            
+            .main-content {
+                order: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="app-header">
+            <h1><i class="fas fa-graduation-cap"></i> SkillSync</h1>
+            <p>Training & Development Planning Tool</p>
+        </div>
+        
+        <!-- Login Section -->
+        <div class="login-container" id="login-section">
+            <h2>Welcome to SkillSync</h2>
+            <p>Please select your role and sign in</p>
+            
+            <div class="user-type-selector">
+                <div class="user-type-btn active" data-role="employee">
+                    <i class="fas fa-user"></i> Employee
+                </div>
+                <div class="user-type-btn" data-role="manager">
+                    <i class="fas fa-user-tie"></i> Manager
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" class="form-control" placeholder="Enter your username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-control" placeholder="Enter your password">
+            </div>
+            
+            <button class="btn btn-primary" id="login-btn">Sign In</button>
+            
+            <div class="auth-toggle">
+                <p>Don't have an account? <a href="#" id="show-register">Register here</a></p>
+            </div>
+            
+            <div id="login-message"></div>
+        </div>
+        
+        <!-- Register Section -->
+        <div class="register-container" id="register-section" style="display: none;">
+            <h2>Create Your Account</h2>
+            <p>Please fill in your details to register</p>
+            
+            <div class="user-type-selector">
+                <div class="user-type-btn active" data-role="employee">
+                    <i class="fas fa-user"></i> Employee
+                </div>
+                <div class="user-type-btn" data-role="manager">
+                    <i class="fas fa-user-tie"></i> Manager
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="reg-username">Username</label>
+                <input type="text" id="reg-username" class="form-control" placeholder="Choose a username">
+            </div>
+            
+            <div class="form-group">
+                <label for="reg-email">Email</label>
+                <input type="email" id="reg-email" class="form-control" placeholder="Enter your email">
+            </div>
+            
+            <div class="form-group">
+                <label for="reg-fullname">Full Name</label>
+                <input type="text" id="reg-fullname" class="form-control" placeholder="Enter your full name">
+            </div>
+            
+            <div class="form-group" id="manager-select-group">
+                <label for="reg-manager">Manager (Employees only)</label>
+                <select id="reg-manager" class="form-control">
+                    <option value="">Select your manager</option>
+                    <!-- Managers will be populated dynamically -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="reg-password">Password</label>
+                <input type="password" id="reg-password" class="form-control" placeholder="Create a password">
+            </div>
+            
+            <div class="form-group">
+                <label for="reg-confirm-password">Confirm Password</label>
+                <input type="password" id="reg-confirm-password" class="form-control" placeholder="Confirm your password">
+            </div>
+            
+            <button class="btn btn-primary" id="register-btn">Create Account</button>
+            
+            <div class="auth-toggle">
+                <p>Already have an account? <a href="#" id="show-login">Sign in here</a></p>
+            </div>
+            
+            <div id="register-message"></div>
+        </div>
+        
+        <!-- Employee Dashboard -->
+        <div class="app-content employee-view" id="employee-dashboard">
+            <button class="btn logout-btn" id="employee-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            
+            <div class="dashboard">
+                <div class="sidebar">
+                    <ul class="sidebar-menu">
+                        <li><a href="#" class="active" data-section="job-skills"><i class="fas fa-briefcase"></i> Job Skills</a></li>
+                        <li><a href="#" data-section="personal-skills"><i class="fas fa-heart"></i> Personal Skills</a></li>
+                        <li><a href="#" data-section="coaching"><i class="fas fa-comments"></i> Coaching Areas</a></li>
+                        <li><a href="#" data-section="ojt"><i class="fas fa-tasks"></i> On-the-Job Training</a></li>
+                        <li><a href="#" data-section="report"><i class="fas fa-chart-bar"></i> Training Plan Report</a></li>
+                    </ul>
+                </div>
+                
+                <div class="main-content">
+                    <!-- Job Skills Section -->
+                    <div class="section active" id="job-skills">
+                        <h2 class="section-title">Job Skills Development</h2>
+                        <p>Identify skills you need to acquire in the coming year relevant to your job.</p>
+                        
+                        <div class="skill-category">
+                            <h3><i class="fas fa-cogs"></i> Technical Skills</h3>
+                            <div id="technical-skills-list">
+                                <!-- Skills will be added here dynamically -->
+                            </div>
+                            <button class="btn-add" id="add-technical-skill"><i class="fas fa-plus"></i> Add Skill</button>
+                        </div>
+                        
+                        <div class="skill-category">
+                            <h3><i class="fas fa-users"></i> Soft Skills</h3>
+                            <div id="soft-skills-list">
+                                <!-- Skills will be added here dynamically -->
+                            </div>
+                            <button class="btn-add" id="add-soft-skill"><i class="fas fa-plus"></i> Add Skill</button>
+                        </div>
+                        
+                        <div class="save-section">
+                            <button class="btn btn-success" id="save-job-skills"><i class="fas fa-save"></i> Save Job Skills</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Personal Skills Section -->
+                    <div class="section" id="personal-skills">
+                        <h2 class="section-title">Personal Skills Development</h2>
+                        <p>Identify skills you would like to personally develop.</p>
+                        
+                        <div class="skill-category">
+                            <h3><i class="fas fa-brain"></i> Personal Growth</h3>
+                            <div id="personal-growth-list">
+                                <!-- Skills will be added here dynamically -->
+                            </div>
+                            <button class="btn-add" id="add-personal-growth"><i class="fas fa-plus"></i> Add Skill</button>
+                        </div>
+                        
+                        <div class="save-section">
+                            <button class="btn btn-success" id="save-personal-skills"><i class="fas fa-save"></i> Save Personal Skills</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Coaching Areas Section -->
+                    <div class="section" id="coaching">
+                        <h2 class="section-title">Coaching Areas</h2>
+                        <p>Identify coaching areas you need to undergo.</p>
+                        
+                        <div class="skill-category">
+                            <h3><i class="fas fa-chalkboard-teacher"></i> Coaching Needs</h3>
+                            <div id="coaching-needs-list">
+                                <!-- Coaching areas will be added here dynamically -->
+                            </div>
+                            <button class="btn-add" id="add-coaching-need"><i class="fas fa-plus"></i> Add Coaching Area</button>
+                        </div>
+                        
+                        <div class="save-section">
+                            <button class="btn btn-success" id="save-coaching"><i class="fas fa-save"></i> Save Coaching Areas</button>
+                        </div>
+                    </div>
+                    
+                    <!-- On-the-Job Training Section -->
+                    <div class="section" id="ojt">
+                        <h2 class="section-title">On-the-Job Training</h2>
+                        <p>Identify on-the-job training you need to cover.</p>
+                        
+                        <div class="skill-category">
+                            <h3><i class="fas fa-hands-helping"></i> OJT Requirements</h3>
+                            <div id="ojt-requirements-list">
+                                <!-- OJT items will be added here dynamically -->
+                            </div>
+                            <button class="btn-add" id="add-ojt-requirement"><i class="fas fa-plus"></i> Add OJT</button>
+                        </div>
+                        
+                        <div class="save-section">
+                            <button class="btn btn-success" id="save-ojt"><i class="fas fa-save"></i> Save OJT Requirements</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Report Section -->
+                    <div class="section" id="report">
+                        <h2 class="section-title">Training Plan Report</h2>
+                        <p>Review and generate your training plan report.</p>
+                        
+                        <div class="report-container">
+                            <div class="report-header">
+                                <h2>Employee Development Plan</h2>
+                                <p>Generated on: <span id="report-date"></span></p>
+                                <p>Employee: <span id="employee-name"></span></p>
+                                <p>Manager: <span id="employee-manager"></span></p>
+                            </div>
+                            
+                            <div class="report-section">
+                                <h3>Job Skills Development</h3>
+                                <div id="report-job-skills">
+                                    <!-- Job skills report will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <div class="report-section">
+                                <h3>Personal Skills Development</h3>
+                                <div id="report-personal-skills">
+                                    <!-- Personal skills report will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <div class="report-section">
+                                <h3>Coaching Areas</h3>
+                                <div id="report-coaching">
+                                    <!-- Coaching report will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <div class="report-section">
+                                <h3>On-the-Job Training</h3>
+                                <div id="report-ojt">
+                                    <!-- OJT report will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <div class="report-actions">
+                                <button class="btn btn-primary" id="generate-pdf"><i class="fas fa-file-pdf"></i> Generate PDF</button>
+                                <button class="btn btn-warning" id="generate-csv"><i class="fas fa-file-csv"></i> Generate CSV</button>
+                                <button class="btn btn-success" id="print-report"><i class="fas fa-print"></i> Print Report</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Manager Dashboard -->
+        <div class="app-content manager-view" id="manager-dashboard">
+            <button class="btn logout-btn" id="manager-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            
+            <div class="dashboard">
+                <div class="sidebar">
+                    <ul class="sidebar-menu">
+                        <li><a href="#" class="active" data-section="subordinate-skills"><i class="fas fa-briefcase"></i> Subordinate Skills</a></li>
+                        <li><a href="#" data-section="subordinate-coaching"><i class="fas fa-comments"></i> Subordinate Coaching</a></li>
+                        <li><a href="#" data-section="subordinate-ojt"><i class="fas fa-tasks"></i> Subordinate OJT</a></li>
+                        <li><a href="#" data-section="team-report"><i class="fas fa-chart-bar"></i> Team Report</a></li>
+                    </ul>
+                </div>
+                
+                <div class="main-content">
+                    <!-- Subordinate Skills Section -->
+                    <div class="section active" id="subordinate-skills">
+                        <h2 class="section-title">Subordinate Skills Requirements</h2>
+                        <p>Identify skills required by your subordinates.</p>
+                        
+                        <div class="skill-category">
+                            <h3><i class="fas fa-user-friends"></i> Team Members</h3>
+                            <div class="form-group">
+                                <label for="team-member-select">Select Team Member</label>
+                                <select id="team-member-select" class="form-control">
+                                    <option value="">Select a team member</option>
+                                    <!-- Options will be populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="skill-category">
+                            <h3><i class="fas fa-cogs"></i> Required Skills</h3>
+                            <div id="subordinate-skills-list">
+                                <!-- Skills will be added here dynamically -->
+                            </div>
+                            <button class="btn-add" id="add-subordinate-skill"><i class="fas fa-plus"></i> Add Skill</button>
+                        </div>
+                        
+                        <div class="save-section">
+                            <button class="btn btn-success" id="save-subordinate-skills"><i class="fas fa-save"></i> Save Skills</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Subordinate Coaching Section -->
+                    <div class="section" id="subordinate-coaching">
+                        <h2 class="section-title">Subordinate Coaching Requirements</h2>
+                        <p>Identify coaching required by your subordinates.</p>
+                        
+                        <div class="skill-category">
+                            <h3><i class="fas fa-user-friends"></i> Team Members</h3>
+                            <div class="form-group">
+                                <label for="coaching-member-select">Select Team Member</label>
+                                <select id="coaching-member-select" class="form-control">
+                                    <option value="">Select a team member</option>
+                                    <!-- Options will be populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="skill-category">
+                            <h3><i class="fas fa-chalkboard-teacher"></i> Coaching Requirements</h3>
+                            <div id="subordinate-coaching-list">
+                                <!-- Coaching areas will be added here dynamically -->
+                            </div>
+                            <button class="btn-add" id="add-subordinate-coaching"><i class="fas fa-plus"></i> Add Coaching</button>
+                        </div>
+                        
+                        <div class="save-section">
+                            <button class="btn btn-success" id="save-subordinate-coaching"><i class="fas fa-save"></i> Save Coaching</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Subordinate OJT Section -->
+                    <div class="section" id="subordinate-ojt">
+                        <h2 class="section-title">Subordinate On-the-Job Training</h2>
+                        <p>Identify on-the-job training required by your subordinates.</p>
+                        
+                        <div class="skill-category">
+                            <h3><i class="fas fa-user-friends"></i> Team Members</h3>
+                            <div class="form-group">
+                                <label for="ojt-member-select">Select Team Member</label>
+                                <select id="ojt-member-select" class="form-control">
+                                    <option value="">Select a team member</option>
+                                    <!-- Options will be populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="skill-category">
+                            <h3><i class="fas fa-hands-helping"></i> OJT Requirements</h3>
+                            <div id="subordinate-ojt-list">
+                                <!-- OJT items will be added here dynamically -->
+                            </div>
+                            <button class="btn-add" id="add-subordinate-ojt"><i class="fas fa-plus"></i> Add OJT</button>
+                        </div>
+                        
+                        <div class="save-section">
+                            <button class="btn btn-success" id="save-subordinate-ojt"><i class="fas fa-save"></i> Save OJT</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Team Report Section -->
+                    <div class="section" id="team-report">
+                        <h2 class="section-title">Team Development Report</h2>
+                        <p>Review and generate team development report.</p>
+                        
+                        <div class="report-container">
+                            <div class="report-header">
+                                <h2>Team Development Plan</h2>
+                                <p>Generated on: <span id="team-report-date"></span></p>
+                                <p>Manager: <span id="manager-name"></span></p>
+                                <p>Team Size: <span id="team-size"></span> employees</p>
+                            </div>
+                            
+                            <div class="report-section">
+                                <h3>Team Skills Requirements</h3>
+                                <div id="report-team-skills">
+                                    <!-- Team skills report will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <div class="report-section">
+                                <h3>Team Coaching Requirements</h3>
+                                <div id="report-team-coaching">
+                                    <!-- Team coaching report will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <div class="report-section">
+                                <h3>Team On-the-Job Training</h3>
+                                <div id="report-team-ojt">
+                                    <!-- Team OJT report will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <div class="report-actions">
+                                <button class="btn btn-primary" id="generate-team-pdf"><i class="fas fa-file-pdf"></i> Generate PDF</button>
+                                <button class="btn btn-warning" id="generate-team-csv"><i class="fas fa-file-csv"></i> Generate CSV</button>
+                                <button class="btn btn-success" id="print-team-report"><i class="fas fa-print"></i> Print Report</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mini Database using localStorage
+        const DB_KEYS = {
+            USERS: 'skillsync_users',
+            SKILLS: 'skillsync_skills',
+            MANAGER_RECS: 'skillsync_manager_recs'
+        };
+
+        // Initialize database if empty
+        function initializeDatabase() {
+            if (!localStorage.getItem(DB_KEYS.USERS)) {
+                const defaultUsers = {
+                    'employee1': {
+                        password: 'password123',
+                        email: 'employee1@company.com',
+                        role: 'employee',
+                        name: 'John Employee',
+                        manager: 'manager1'
+                    },
+                    'manager1': {
+                        password: 'password123',
+                        email: 'manager1@company.com',
+                        role: 'manager',
+                        name: 'Sarah Manager',
+                        subordinates: ['employee1']
+                    },
+                    'employee2': {
+                        password: 'password123',
+                        email: 'employee2@company.com',
+                        role: 'employee',
+                        name: 'Emma Developer',
+                        manager: 'manager1'
+                    }
+                };
+                localStorage.setItem(DB_KEYS.USERS, JSON.stringify(defaultUsers));
+            }
+
+            if (!localStorage.getItem(DB_KEYS.SKILLS)) {
+                const defaultSkills = {
+                    'employee1': {
+                        jobSkills: {
+                            technical: ['JavaScript ES6+', 'React Framework'],
+                            soft: ['Project Management', 'Client Communication']
+                        },
+                        personalSkills: ['Public Speaking', 'Time Management'],
+                        coaching: ['Presentation Skills', 'Leadership Training'],
+                        ojt: ['Cross-functional Project', 'Mentorship Program']
+                    },
+                    'employee2': {
+                        jobSkills: {
+                            technical: ['Python Programming', 'Data Analysis'],
+                            soft: ['Team Collaboration', 'Problem Solving']
+                        },
+                        personalSkills: ['Conflict Resolution', 'Strategic Thinking'],
+                        coaching: ['Advanced Excel Training'],
+                        ojt: ['Agile Methodology', 'Code Review Process']
+                    }
+                };
+                localStorage.setItem(DB_KEYS.SKILLS, JSON.stringify(defaultSkills));
+            }
+
+            if (!localStorage.getItem(DB_KEYS.MANAGER_RECS)) {
+                const defaultRecs = {
+                    'manager1': {
+                        'employee1': {
+                            skills: ['Advanced React Patterns', 'TypeScript'],
+                            coaching: ['Technical Leadership'],
+                            ojt: ['Architecture Design']
+                        }
+                    }
+                };
+                localStorage.setItem(DB_KEYS.MANAGER_RECS, JSON.stringify(defaultRecs));
+            }
+        }
+
+        // Database functions
+        function getUsers() {
+            return JSON.parse(localStorage.getItem(DB_KEYS.USERS)) || {};
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem(DB_KEYS.USERS, JSON.stringify(users));
+        }
+
+        function getSkills() {
+            return JSON.parse(localStorage.getItem(DB_KEYS.SKILLS)) || {};
+        }
+
+        function saveSkills(skills) {
+            localStorage.setItem(DB_KEYS.SKILLS, JSON.stringify(skills));
+        }
+
+        function getManagerRecs() {
+            return JSON.parse(localStorage.getItem(DB_KEYS.MANAGER_RECS)) || {};
+        }
+
+        function saveManagerRecs(recs) {
+            localStorage.setItem(DB_KEYS.MANAGER_RECS, JSON.stringify(recs));
+        }
+
+        // DOM Elements
+        const loginSection = document.getElementById('login-section');
+        const registerSection = document.getElementById('register-section');
+        const employeeDashboard = document.getElementById('employee-dashboard');
+        const managerDashboard = document.getElementById('manager-dashboard');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const employeeLogoutBtn = document.getElementById('employee-logout');
+        const managerLogoutBtn = document.getElementById('manager-logout');
+        const userTypeBtns = document.querySelectorAll('.user-type-btn');
+        const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
+        const sections = document.querySelectorAll('.section');
+        const showRegisterLink = document.getElementById('show-register');
+        const showLoginLink = document.getElementById('show-login');
+        const managerSelect = document.getElementById('reg-manager');
+        const managerSelectGroup = document.getElementById('manager-select-group');
+        
+        // Current user info
+        let currentUser = null;
+        let currentUserType = 'employee';
+
+        // Initialize the application
+        initializeDatabase();
+        populateManagerDropdown();
+
+        // Populate manager dropdown in registration
+        function populateManagerDropdown() {
+            const users = getUsers();
+            managerSelect.innerHTML = '<option value="">Select your manager</option>';
+            
+            Object.keys(users).forEach(username => {
+                if (users[username].role === 'manager') {
+                    const option = document.createElement('option');
+                    option.value = username;
+                    option.textContent = users[username].name;
+                    managerSelect.appendChild(option);
+                }
+            });
+        }
+
+        // Initialize user type selection
+        userTypeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                userTypeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentUserType = btn.getAttribute('data-role');
+                
+                // Show/hide manager selection based on role
+                if (currentUserType === 'employee') {
+                    managerSelectGroup.style.display = 'block';
+                } else {
+                    managerSelectGroup.style.display = 'none';
+                }
+            });
+        });
+        
+        // Toggle between login and register
+        showRegisterLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginSection.style.display = 'none';
+            registerSection.style.display = 'flex';
+            populateManagerDropdown();
+        });
+        
+        showLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerSection.style.display = 'none';
+            loginSection.style.display = 'flex';
+        });
+        
+        // Registration functionality
+        registerBtn.addEventListener('click', () => {
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const fullName = document.getElementById('reg-fullname').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm-password').value;
+            const manager = document.getElementById('reg-manager').value;
+            
+            // Validate inputs
+            if (!username || !email || !fullName || !password || !confirmPassword) {
+                showMessage('register-message', 'Please fill in all fields', 'error');
+                return;
+            }
+            
+            const users = getUsers();
+            
+            if (users[username]) {
+                showMessage('register-message', 'Username already exists', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showMessage('register-message', 'Passwords do not match', 'error');
+                return;
+            }
+            
+            // For employees, require manager selection
+            if (currentUserType === 'employee' && !manager) {
+                showMessage('register-message', 'Please select your manager', 'error');
+                return;
+            }
+            
+            // Register user
+            users[username] = {
+                password: password,
+                email: email,
+                role: currentUserType,
+                name: fullName
+            };
+            
+            // Add manager relationship for employees
+            if (currentUserType === 'employee') {
+                users[username].manager = manager;
+                
+                // Add to manager's subordinates list
+                if (users[manager]) {
+                    if (!users[manager].subordinates) {
+                        users[manager].subordinates = [];
+                    }
+                    users[manager].subordinates.push(username);
+                }
+            } else {
+                // Initialize empty subordinates list for managers
+                users[username].subordinates = [];
+            }
+            
+            saveUsers(users);
+            
+            // Initialize skills database for new user
+            const skills = getSkills();
+            skills[username] = {
+                jobSkills: { technical: [], soft: [] },
+                personalSkills: [],
+                coaching: [],
+                ojt: []
+            };
+            saveSkills(skills);
+            
+            showMessage('register-message', 'Account created successfully! Please login.', 'success');
+            
+            // Clear form
+            document.getElementById('reg-username').value = '';
+            document.getElementById('reg-email').value = '';
+            document.getElementById('reg-fullname').value = '';
+            document.getElementById('reg-password').value = '';
+            document.getElementById('reg-confirm-password').value = '';
+            document.getElementById('reg-manager').value = '';
+            
+            // Switch to login after a delay
+            setTimeout(() => {
+                registerSection.style.display = 'none';
+                loginSection.style.display = 'flex';
+            }, 2000);
+        });
+        
+        // Login functionality
+        loginBtn.addEventListener('click', () => {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showMessage('login-message', 'Please enter both username and password', 'error');
+                return;
+            }
+            
+            const users = getUsers();
+            const user = users[username];
+            
+            if (!user || user.password !== password) {
+                showMessage('login-message', 'Invalid username or password', 'error');
+                return;
+            }
+            
+            // Check if user role matches selected role
+            if (user.role !== currentUserType) {
+                showMessage('login-message', `This account is registered as a ${user.role}, please select the correct role`, 'error');
+                return;
+            }
+            
+            // Successful login
+            currentUser = username;
+            showMessage('login-message', 'Login successful!', 'success');
+            
+            setTimeout(() => {
+                loginSection.style.display = 'none';
+                
+                if (currentUserType === 'employee') {
+                    employeeDashboard.style.display = 'block';
+                    managerDashboard.style.display = 'none';
+                    document.getElementById('employee-name').textContent = user.name;
+                    
+                    // Set manager name if exists
+                    if (user.manager && users[user.manager]) {
+                        document.getElementById('employee-manager').textContent = users[user.manager].name;
+                    }
+                    
+                    loadEmployeeData();
+                } else {
+                    employeeDashboard.style.display = 'none';
+                    managerDashboard.style.display = 'block';
+                    document.getElementById('manager-name').textContent = user.name;
+                    loadManagerData();
+                }
+            }, 1000);
+        });
+        
+        // Logout functionality
+        employeeLogoutBtn.addEventListener('click', () => {
+            employeeDashboard.style.display = 'none';
+            loginSection.style.display = 'flex';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('login-message').innerHTML = '';
+            currentUser = null;
+        });
+        
+        managerLogoutBtn.addEventListener('click', () => {
+            managerDashboard.style.display = 'none';
+            loginSection.style.display = 'flex';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('login-message').innerHTML = '';
+            currentUser = null;
+        });
+        
+        // Navigation functionality
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remove active class from all links
+                const parentMenu = link.closest('.sidebar-menu');
+                parentMenu.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+                
+                // Add active class to clicked link
+                link.classList.add('active');
+                
+                // Hide all sections
+                const parentContent = link.closest('.dashboard').querySelector('.main-content');
+                parentContent.querySelectorAll('.section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Show target section
+                const targetSection = link.getAttribute('data-section');
+                document.getElementById(targetSection).classList.add('active');
+                
+                // If report section, generate report
+                if (targetSection === 'report' || targetSection === 'team-report') {
+                    generateReport();
+                }
+            });
+        });
+        
+        // Load employee data
+        function loadEmployeeData() {
+            if (!currentUser) return;
+            
+            const skills = getSkills();
+            const userSkills = skills[currentUser] || {
+                jobSkills: { technical: [], soft: [] },
+                personalSkills: [],
+                coaching: [],
+                ojt: []
+            };
+            
+            // Load job skills
+            loadSkillList('technical-skills-list', userSkills.jobSkills.technical, 'job-technical');
+            loadSkillList('soft-skills-list', userSkills.jobSkills.soft, 'job-soft');
+            
+            // Load personal skills
+            loadSkillList('personal-growth-list', userSkills.personalSkills, 'personal');
+            
+            // Load coaching areas
+            loadSkillList('coaching-needs-list', userSkills.coaching, 'coaching');
+            
+            // Load OJT requirements
+            loadSkillList('ojt-requirements-list', userSkills.ojt, 'ojt');
+            
+            // Set up add buttons and save handlers
+            setupEmployeeSkillManagement();
+        }
+        
+        // Load manager data
+        function loadManagerData() {
+            if (!currentUser) return;
+            
+            const users = getUsers();
+            const teamMembers = users[currentUser].subordinates || [];
+            
+            // Populate team member dropdowns
+            const memberSelects = [
+                'team-member-select',
+                'coaching-member-select', 
+                'ojt-member-select'
+            ];
+            
+            memberSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">Select a team member</option>';
+                
+                teamMembers.forEach(memberId => {
+                    const member = users[memberId];
+                    if (member) {
+                        const option = document.createElement('option');
+                        option.value = memberId;
+                        option.textContent = member.name;
+                        select.appendChild(option);
+                    }
+                });
+                
+                // Add change listeners to load data when member is selected
+                select.addEventListener('change', function() {
+                    const memberId = this.value;
+                    if (memberId) {
+                        if (selectId === 'team-member-select') {
+                            loadSubordinateSkills(memberId);
+                        } else if (selectId === 'coaching-member-select') {
+                            loadSubordinateCoaching(memberId);
+                        } else if (selectId === 'ojt-member-select') {
+                            loadSubordinateOJT(memberId);
+                        }
+                    }
+                });
+            });
+            
+            // Load initial data if members exist
+            if (teamMembers.length > 0) {
+                const firstMember = teamMembers[0];
+                document.getElementById('team-member-select').value = firstMember;
+                loadSubordinateSkills(firstMember);
+                
+                document.getElementById('coaching-member-select').value = firstMember;
+                loadSubordinateCoaching(firstMember);
+                
+                document.getElementById('ojt-member-select').value = firstMember;
+                loadSubordinateOJT(firstMember);
+            }
+            
+            // Set up add buttons for manager
+            setupManagerSkillManagement();
+        }
+        
+        // Load subordinate skills for manager
+        function loadSubordinateSkills(memberId) {
+            const skills = getSkills();
+            const userSkills = skills[memberId] || { jobSkills: { technical: [], soft: [] } };
+            const managerRecs = getManagerRecs();
+            const userRecs = managerRecs[currentUser]?.[memberId]?.skills || [];
+            
+            // Combine employee skills and manager recommendations
+            const allSkills = [
+                ...userSkills.jobSkills.technical,
+                ...userSkills.jobSkills.soft,
+                ...userRecs
+            ];
+            
+            loadSkillList('subordinate-skills-list', allSkills, 'subordinate-skills', true);
+        }
+        
+        function loadSubordinateCoaching(memberId) {
+            const skills = getSkills();
+            const userCoaching = skills[memberId]?.coaching || [];
+            const managerRecs = getManagerRecs();
+            const userRecs = managerRecs[currentUser]?.[memberId]?.coaching || [];
+            
+            const allCoaching = [...userCoaching, ...userRecs];
+            loadSkillList('subordinate-coaching-list', allCoaching, 'subordinate-coaching', true);
+        }
+        
+        function loadSubordinateOJT(memberId) {
+            const skills = getSkills();
+            const userOJT = skills[memberId]?.ojt || [];
+            const managerRecs = getManagerRecs();
+            const userRecs = managerRecs[currentUser]?.[memberId]?.ojt || [];
+            
+            const allOJT = [...userOJT, ...userRecs];
+            loadSkillList('subordinate-ojt-list', allOJT, 'subordinate-ojt', true);
+        }
+        
+        // Load skills into a list
+        function loadSkillList(listId, skills, type, isManagerView = false) {
+            const list = document.getElementById(listId);
+            list.innerHTML = '';
+            
+            skills.forEach(skill => {
+                const skillItem = createSkillItem(skill, type, isManagerView);
+                list.appendChild(skillItem);
+            });
+        }
+        
+        // Create a skill item element
+        function createSkillItem(skill, type, isManagerView = false) {
+            const skillItem = document.createElement('div');
+            skillItem.className = 'skill-item';
+            
+            // Check if this is a manager recommendation
+            const managerRecs = getManagerRecs();
+            const isRecommendation = isManagerView && 
+                managerRecs[currentUser] && 
+                Object.values(managerRecs[currentUser]).some(recs => 
+                    recs.skills?.includes(skill) || 
+                    recs.coaching?.includes(skill) || 
+                    recs.ojt?.includes(skill)
+                );
+            
+            if (isManagerView) {
+                skillItem.innerHTML = `
+                    <div style="flex: 1;">
+                        <span>${skill}</span>
+                        ${isRecommendation ? '<span style="color: var(--warning); margin-left: 10px;"><i class="fas fa-star"></i> Manager Recommendation</span>' : ''}
+                    </div>
+                    <div class="skill-actions">
+                        <button class="btn-icon"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+            } else {
+                skillItem.innerHTML = `
+                    <input type="text" class="skill-input" value="${skill}" placeholder="Enter skill or requirement">
+                    <select class="priority-select">
+                        <option value="low">Low Priority</option>
+                        <option value="medium">Medium Priority</option>
+                        <option value="high">High Priority</option>
+                    </select>
+                    <div class="skill-actions">
+                        <button class="btn-icon"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+            }
+            
+            // Add delete functionality
+            const deleteBtn = skillItem.querySelector('.fa-trash').closest('button');
+            deleteBtn.addEventListener('click', () => {
+                // Remove from database
+                removeSkillFromDatabase(skill, type);
+                // Remove from UI
+                skillItem.remove();
+            });
+            
+            return skillItem;
+        }
+        
+        // Remove skill from database
+        function removeSkillFromDatabase(skill, type) {
+            if (!currentUser) return;
+            
+            const skills = getSkills();
+            if (!skills[currentUser]) return;
+            
+            const userSkills = skills[currentUser];
+            
+            switch(type) {
+                case 'job-technical':
+                    userSkills.jobSkills.technical = userSkills.jobSkills.technical.filter(s => s !== skill);
+                    break;
+                case 'job-soft':
+                    userSkills.jobSkills.soft = userSkills.jobSkills.soft.filter(s => s !== skill);
+                    break;
+                case 'personal':
+                    userSkills.personalSkills = userSkills.personalSkills.filter(s => s !== skill);
+                    break;
+                case 'coaching':
+                    userSkills.coaching = userSkills.coaching.filter(s => s !== skill);
+                    break;
+                case 'ojt':
+                    userSkills.ojt = userSkills.ojt.filter(s => s !== skill);
+                    break;
+                case 'subordinate-skills':
+                case 'subordinate-coaching':
+                case 'subordinate-ojt':
+                    // For manager recommendations, remove from manager recs
+                    const memberId = getCurrentSelectedMember(type);
+                    if (memberId) {
+                        removeManagerRecommendation(skill, type, memberId);
+                    }
+                    break;
+            }
+            
+            saveSkills(skills);
+        }
+        
+        // Set up skill management for employee - FIXED VERSION
+        function setupEmployeeSkillManagement() {
+            // Employee skills
+            setupSkillList('technical-skills-list', 'add-technical-skill', 'job-technical');
+            setupSkillList('soft-skills-list', 'add-soft-skill', 'job-soft');
+            setupSkillList('personal-growth-list', 'add-personal-growth', 'personal');
+            setupSkillList('coaching-needs-list', 'add-coaching-need', 'coaching');
+            setupSkillList('ojt-requirements-list', 'add-ojt-requirement', 'ojt');
+            
+            // Set up save buttons - FIXED VERSION
+            document.getElementById('save-job-skills').addEventListener('click', function() {
+                saveAllSkillsInSection('technical-skills-list', 'soft-skills-list', 'job');
+            });
+            document.getElementById('save-personal-skills').addEventListener('click', function() {
+                saveAllSkillsInSection('personal-growth-list', null, 'personal');
+            });
+            document.getElementById('save-coaching').addEventListener('click', function() {
+                saveAllSkillsInSection('coaching-needs-list', null, 'coaching');
+            });
+            document.getElementById('save-ojt').addEventListener('click', function() {
+                saveAllSkillsInSection('ojt-requirements-list', null, 'ojt');
+            });
+        }
+
+        // Set up skill management for manager - FIXED VERSION
+        function setupManagerSkillManagement() {
+            setupSkillList('subordinate-skills-list', 'add-subordinate-skill', 'subordinate-skills', true);
+            setupSkillList('subordinate-coaching-list', 'add-subordinate-coaching', 'subordinate-coaching', true);
+            setupSkillList('subordinate-ojt-list', 'add-subordinate-ojt', 'subordinate-ojt', true);
+            
+            // Set up save buttons - FIXED VERSION
+            document.getElementById('save-subordinate-skills').addEventListener('click', function() {
+                saveAllManagerRecommendations('subordinate-skills-list', 'skills');
+            });
+            document.getElementById('save-subordinate-coaching').addEventListener('click', function() {
+                saveAllManagerRecommendations('subordinate-coaching-list', 'coaching');
+            });
+            document.getElementById('save-subordinate-ojt').addEventListener('click', function() {
+                saveAllManagerRecommendations('subordinate-ojt-list', 'ojt');
+            });
+        }
+
+        // NEW FUNCTION: Save all skills in a section when Save button is clicked
+        function saveAllSkillsInSection(listId1, listId2, type) {
+            if (!currentUser) return;
+            
+            const skills = getSkills();
+            if (!skills[currentUser]) {
+                skills[currentUser] = {
+                    jobSkills: { technical: [], soft: [] },
+                    personalSkills: [],
+                    coaching: [],
+                    ojt: []
+                };
+            }
+            
+            const userSkills = skills[currentUser];
+            
+            // Clear existing skills for this section
+            if (type === 'job') {
+                userSkills.jobSkills.technical = [];
+                userSkills.jobSkills.soft = [];
+                
+                // Save technical skills
+                const technicalList = document.getElementById(listId1);
+                const technicalInputs = technicalList.querySelectorAll('.skill-input');
+                technicalInputs.forEach(input => {
+                    if (input.value.trim()) {
+                        userSkills.jobSkills.technical.push(input.value.trim());
+                    }
+                });
+                
+                // Save soft skills
+                const softList = document.getElementById(listId2);
+                const softInputs = softList.querySelectorAll('.skill-input');
+                softInputs.forEach(input => {
+                    if (input.value.trim()) {
+                        userSkills.jobSkills.soft.push(input.value.trim());
+                    }
+                });
+                
+            } else if (type === 'personal') {
+                userSkills.personalSkills = [];
+                const list = document.getElementById(listId1);
+                const inputs = list.querySelectorAll('.skill-input');
+                inputs.forEach(input => {
+                    if (input.value.trim()) {
+                        userSkills.personalSkills.push(input.value.trim());
+                    }
+                });
+                
+            } else if (type === 'coaching') {
+                userSkills.coaching = [];
+                const list = document.getElementById(listId1);
+                const inputs = list.querySelectorAll('.skill-input');
+                inputs.forEach(input => {
+                    if (input.value.trim()) {
+                        userSkills.coaching.push(input.value.trim());
+                    }
+                });
+                
+            } else if (type === 'ojt') {
+                userSkills.ojt = [];
+                const list = document.getElementById(listId1);
+                const inputs = list.querySelectorAll('.skill-input');
+                inputs.forEach(input => {
+                    if (input.value.trim()) {
+                        userSkills.ojt.push(input.value.trim());
+                    }
+                });
+            }
+            
+            saveSkills(skills);
+            showMessage('login-message', `${type.charAt(0).toUpperCase() + type.slice(1)} skills saved successfully!`, 'success');
+            
+            // Reload the data to reflect changes
+            loadEmployeeData();
+        }
+
+        // NEW FUNCTION: Save all manager recommendations when Save button is clicked
+        function saveAllManagerRecommendations(listId, recType) {
+            if (!currentUser) return;
+            
+            // Get currently selected team member
+            const memberId = getCurrentSelectedMember('subordinate-' + recType);
+            
+            if (!memberId) {
+                alert('Please select a team member first');
+                return;
+            }
+            
+            const managerRecs = getManagerRecs();
+            
+            // Initialize manager recommendations if needed
+            if (!managerRecs[currentUser]) {
+                managerRecs[currentUser] = {};
+            }
+            if (!managerRecs[currentUser][memberId]) {
+                managerRecs[currentUser][memberId] = {
+                    skills: [],
+                    coaching: [],
+                    ojt: []
+                };
+            }
+            
+            // Clear existing recommendations for this type
+            managerRecs[currentUser][memberId][recType] = [];
+            
+            // Save all recommendations from the list
+            const list = document.getElementById(listId);
+            const inputs = list.querySelectorAll('.skill-input');
+            inputs.forEach(input => {
+                if (input.value.trim()) {
+                    managerRecs[currentUser][memberId][recType].push(input.value.trim());
+                }
+            });
+            
+            saveManagerRecs(managerRecs);
+            showMessage('login-message', `${recType.charAt(0).toUpperCase() + recType.slice(1)} recommendations saved successfully!`, 'success');
+            
+            // Reload the data to reflect changes
+            if (recType === 'skills') {
+                loadSubordinateSkills(memberId);
+            } else if (recType === 'coaching') {
+                loadSubordinateCoaching(memberId);
+            } else if (recType === 'ojt') {
+                loadSubordinateOJT(memberId);
+            }
+        }
+        
+        function setupSkillList(listId, addButtonId, type, isManagerView = false) {
+            const list = document.getElementById(listId);
+            const addButton = document.getElementById(addButtonId);
+            
+            if (addButton) {
+                addButton.addEventListener('click', () => {
+                    const skillItem = document.createElement('div');
+                    skillItem.className = 'skill-item';
+                    
+                    if (isManagerView) {
+                        skillItem.innerHTML = `
+                            <input type="text" class="skill-input" placeholder="Enter recommendation">
+                            <div class="skill-actions">
+                                <button class="btn-icon"><i class="fas fa-trash"></i></button>
+                            </div>
+                        `;
+                    } else {
+                        skillItem.innerHTML = `
+                            <input type="text" class="skill-input" placeholder="Enter skill or requirement">
+                            <select class="priority-select">
+                                <option value="low">Low Priority</option>
+                                <option value="medium">Medium Priority</option>
+                                <option value="high">High Priority</option>
+                            </select>
+                            <div class="skill-actions">
+                                <button class="btn-icon"><i class="fas fa-trash"></i></button>
+                            </div>
+                        `;
+                    }
+                    
+                    // Add delete functionality
+                    const deleteBtn = skillItem.querySelector('.fa-trash').closest('button');
+                    deleteBtn.addEventListener('click', () => {
+                        list.removeChild(skillItem);
+                    });
+                    
+                    list.appendChild(skillItem);
+                });
+            }
+        }
+        
+        // Get currently selected team member for manager
+        function getCurrentSelectedMember(type) {
+            let selectId;
+            if (type === 'subordinate-skills') {
+                selectId = 'team-member-select';
+            } else if (type === 'subordinate-coaching') {
+                selectId = 'coaching-member-select';
+            } else if (type === 'subordinate-ojt') {
+                selectId = 'ojt-member-select';
+            }
+            
+            return document.getElementById(selectId).value;
+        }
+        
+        // Remove manager recommendation
+        function removeManagerRecommendation(recommendation, type, memberId) {
+            const managerRecs = getManagerRecs();
+            
+            if (!managerRecs[currentUser] || !managerRecs[currentUser][memberId]) return;
+            
+            const recType = type.replace('subordinate-', '');
+            if (recType === 'skills') {
+                managerRecs[currentUser][memberId].skills = 
+                    managerRecs[currentUser][memberId].skills.filter(s => s !== recommendation);
+            } else if (recType === 'coaching') {
+                managerRecs[currentUser][memberId].coaching = 
+                    managerRecs[currentUser][memberId].coaching.filter(s => s !== recommendation);
+            } else if (recType === 'ojt') {
+                managerRecs[currentUser][memberId].ojt = 
+                    managerRecs[currentUser][memberId].ojt.filter(s => s !== recommendation);
+            }
+            
+            saveManagerRecs(managerRecs);
+        }
+        
+        // Report generation - FIXED VERSION
+        function generateReport() {
+            const date = new Date().toLocaleDateString();
+            
+            // Set report date
+            document.getElementById('report-date').textContent = date;
+            document.getElementById('team-report-date').textContent = date;
+            
+            if (currentUserType === 'employee') {
+                generateEmployeeReport();
+            } else {
+                generateManagerReport();
+            }
+        }
+        
+        function generateEmployeeReport() {
+            if (!currentUser) return;
+            
+            const skills = getSkills();
+            const userSkills = skills[currentUser] || {
+                jobSkills: { technical: [], soft: [] },
+                personalSkills: [],
+                coaching: [],
+                ojt: []
+            };
+            
+            // Clear previous content
+            document.getElementById('report-job-skills').innerHTML = '';
+            document.getElementById('report-personal-skills').innerHTML = '';
+            document.getElementById('report-coaching').innerHTML = '';
+            document.getElementById('report-ojt').innerHTML = '';
+            
+            // Job Skills
+            if (userSkills.jobSkills.technical.length === 0 && userSkills.jobSkills.soft.length === 0) {
+                document.getElementById('report-job-skills').innerHTML = '<div class="report-item">No job skills added yet.</div>';
+            } else {
+                userSkills.jobSkills.technical.forEach(skill => {
+                    const item = document.createElement('div');
+                    item.className = 'report-item';
+                    item.textContent = `Technical: ${skill}`;
+                    document.getElementById('report-job-skills').appendChild(item);
+                });
+                
+                userSkills.jobSkills.soft.forEach(skill => {
+                    const item = document.createElement('div');
+                    item.className = 'report-item';
+                    item.textContent = `Soft Skill: ${skill}`;
+                    document.getElementById('report-job-skills').appendChild(item);
+                });
+            }
+            
+            // Personal Skills
+            if (userSkills.personalSkills.length === 0) {
+                document.getElementById('report-personal-skills').innerHTML = '<div class="report-item">No personal skills added yet.</div>';
+            } else {
+                userSkills.personalSkills.forEach(skill => {
+                    const item = document.createElement('div');
+                    item.className = 'report-item';
+                    item.textContent = skill;
+                    document.getElementById('report-personal-skills').appendChild(item);
+                });
+            }
+            
+            // Coaching
+            if (userSkills.coaching.length === 0) {
+                document.getElementById('report-coaching').innerHTML = '<div class="report-item">No coaching areas added yet.</div>';
+            } else {
+                userSkills.coaching.forEach(skill => {
+                    const item = document.createElement('div');
+                    item.className = 'report-item';
+                    item.textContent = skill;
+                    document.getElementById('report-coaching').appendChild(item);
+                });
+            }
+            
+            // OJT
+            if (userSkills.ojt.length === 0) {
+                document.getElementById('report-ojt').innerHTML = '<div class="report-item">No OJT requirements added yet.</div>';
+            } else {
+                userSkills.ojt.forEach(skill => {
+                    const item = document.createElement('div');
+                    item.className = 'report-item';
+                    item.textContent = skill;
+                    document.getElementById('report-ojt').appendChild(item);
+                });
+            }
+        }
+        
+        function generateManagerReport() {
+            if (!currentUser) return;
+            
+            const users = getUsers();
+            const skills = getSkills();
+            const managerRecs = getManagerRecs();
+            const teamMembers = users[currentUser].subordinates || [];
+            
+            document.getElementById('team-size').textContent = teamMembers.length;
+            
+            // Clear previous content
+            document.getElementById('report-team-skills').innerHTML = '';
+            document.getElementById('report-team-coaching').innerHTML = '';
+            document.getElementById('report-team-ojt').innerHTML = '';
+            
+            // Team Skills
+            if (teamMembers.length === 0) {
+                document.getElementById('report-team-skills').innerHTML = '<div class="report-item">No team members assigned.</div>';
+            } else {
+                teamMembers.forEach(memberId => {
+                    const member = users[memberId];
+                    const userSkills = skills[memberId] || { jobSkills: { technical: [], soft: [] } };
+                    const userRecs = managerRecs[currentUser]?.[memberId]?.skills || [];
+                    
+                    const hasSkills = userSkills.jobSkills.technical.length > 0 || 
+                                     userSkills.jobSkills.soft.length > 0 || 
+                                     userRecs.length > 0;
+                    
+                    if (hasSkills) {
+                        const header = document.createElement('div');
+                        header.className = 'report-item';
+                        header.innerHTML = `<strong>${member.name}:</strong>`;
+                        document.getElementById('report-team-skills').appendChild(header);
+                        
+                        // Employee skills
+                        userSkills.jobSkills.technical.forEach(skill => {
+                            const item = document.createElement('div');
+                            item.className = 'report-item';
+                            item.style.paddingLeft = '20px';
+                            item.textContent = `Technical: ${skill}`;
+                            document.getElementById('report-team-skills').appendChild(item);
+                        });
+                        
+                        userSkills.jobSkills.soft.forEach(skill => {
+                            const item = document.createElement('div');
+                            item.className = 'report-item';
+                            item.style.paddingLeft = '20px';
+                            item.textContent = `Soft Skill: ${skill}`;
+                            document.getElementById('report-team-skills').appendChild(item);
+                        });
+                        
+                        // Manager recommendations
+                        if (userRecs.length > 0) {
+                            const recHeader = document.createElement('div');
+                            recHeader.className = 'report-item';
+                            recHeader.style.paddingLeft = '20px';
+                            recHeader.innerHTML = `<em>Manager Recommendations:</em>`;
+                            document.getElementById('report-team-skills').appendChild(recHeader);
+                            
+                            userRecs.forEach(skill => {
+                                const item = document.createElement('div');
+                                item.className = 'report-item';
+                                item.style.paddingLeft = '40px';
+                                item.textContent = skill;
+                                document.getElementById('report-team-skills').appendChild(item);
+                            });
+                        }
+                    }
+                });
+            }
+            
+            // Team Coaching
+            if (teamMembers.length === 0) {
+                document.getElementById('report-team-coaching').innerHTML = '<div class="report-item">No team members assigned.</div>';
+            } else {
+                teamMembers.forEach(memberId => {
+                    const member = users[memberId];
+                    const userCoaching = skills[memberId]?.coaching || [];
+                    const userRecs = managerRecs[currentUser]?.[memberId]?.coaching || [];
+                    
+                    const hasCoaching = userCoaching.length > 0 || userRecs.length > 0;
+                    
+                    if (hasCoaching) {
+                        const header = document.createElement('div');
+                        header.className = 'report-item';
+                        header.innerHTML = `<strong>${member.name}:</strong>`;
+                        document.getElementById('report-team-coaching').appendChild(header);
+                        
+                        // Employee coaching needs
+                        userCoaching.forEach(skill => {
+                            const item = document.createElement('div');
+                            item.className = 'report-item';
+                            item.style.paddingLeft = '20px';
+                            item.textContent = skill;
+                            document.getElementById('report-team-coaching').appendChild(item);
+                        });
+                        
+                        // Manager recommendations
+                        if (userRecs.length > 0) {
+                            userRecs.forEach(skill => {
+                                const item = document.createElement('div');
+                                item.className = 'report-item';
+                                item.style.paddingLeft = '20px';
+                                item.innerHTML = `${skill} <span style="color: var(--warning);"><i class="fas fa-star"></i> Recommended</span>`;
+                                document.getElementById('report-team-coaching').appendChild(item);
+                            });
+                        }
+                    }
+                });
+            }
+            
+            // Team OJT
+            if (teamMembers.length === 0) {
+                document.getElementById('report-team-ojt').innerHTML = '<div class="report-item">No team members assigned.</div>';
+            } else {
+                teamMembers.forEach(memberId => {
+                    const member = users[memberId];
+                    const userOJT = skills[memberId]?.ojt || [];
+                    const userRecs = managerRecs[currentUser]?.[memberId]?.ojt || [];
+                    
+                    const hasOJT = userOJT.length > 0 || userRecs.length > 0;
+                    
+                    if (hasOJT) {
+                        const header = document.createElement('div');
+                        header.className = 'report-item';
+                        header.innerHTML = `<strong>${member.name}:</strong>`;
+                        document.getElementById('report-team-ojt').appendChild(header);
+                        
+                        // Employee OJT needs
+                        userOJT.forEach(skill => {
+                            const item = document.createElement('div');
+                            item.className = 'report-item';
+                            item.style.paddingLeft = '20px';
+                            item.textContent = skill;
+                            document.getElementById('report-team-ojt').appendChild(item);
+                        });
+                        
+                        // Manager recommendations
+                        if (userRecs.length > 0) {
+                            userRecs.forEach(skill => {
+                                const item = document.createElement('div');
+                                item.className = 'report-item';
+                                item.style.paddingLeft = '20px';
+                                item.innerHTML = `${skill} <span style="color: var(--warning);"><i class="fas fa-star"></i> Recommended</span>`;
+                                document.getElementById('report-team-ojt').appendChild(item);
+                            });
+                        }
+                    }
+                });
+            }
+        }
+        
+        // PDF Generation - FIXED VERSION
+        document.getElementById('generate-pdf').addEventListener('click', generateEmployeePDF);
+        document.getElementById('generate-team-pdf').addEventListener('click', generateManagerPDF);
+        
+        function generateEmployeePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const users = getUsers();
+            const skills = getSkills();
+            const user = users[currentUser];
+            const userSkills = skills[currentUser] || {
+                jobSkills: { technical: [], soft: [] },
+                personalSkills: [],
+                coaching: [],
+                ojt: []
+            };
+            
+            // Title
+            doc.setFontSize(20);
+            doc.text('Employee Development Plan', 105, 15, { align: 'center' });
+            
+            // Employee Info
+            doc.setFontSize(12);
+            doc.text(`Employee: ${user.name}`, 20, 30);
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 40);
+            if (user.manager && users[user.manager]) {
+                doc.text(`Manager: ${users[user.manager].name}`, 20, 50);
+            }
+            
+            let yPosition = 70;
+            
+            // Job Skills
+            doc.setFontSize(14);
+            doc.text('Job Skills Development', 20, yPosition);
+            yPosition += 10;
+            
+            doc.setFontSize(10);
+            if (userSkills.jobSkills.technical.length === 0 && userSkills.jobSkills.soft.length === 0) {
+                doc.text('No job skills added yet.', 25, yPosition);
+                yPosition += 7;
+            } else {
+                userSkills.jobSkills.technical.forEach(skill => {
+                    doc.text(`• Technical: ${skill}`, 25, yPosition);
+                    yPosition += 7;
+                });
+                
+                userSkills.jobSkills.soft.forEach(skill => {
+                    doc.text(`• Soft Skill: ${skill}`, 25, yPosition);
+                    yPosition += 7;
+                });
+            }
+            
+            yPosition += 5;
+            
+            // Personal Skills
+            if (userSkills.personalSkills.length > 0) {
+                doc.setFontSize(14);
+                doc.text('Personal Skills Development', 20, yPosition);
+                yPosition += 10;
+                
+                doc.setFontSize(10);
+                userSkills.personalSkills.forEach(skill => {
+                    doc.text(`• ${skill}`, 25, yPosition);
+                    yPosition += 7;
+                });
+                yPosition += 5;
+            }
+            
+            // Coaching
+            if (userSkills.coaching.length > 0) {
+                doc.setFontSize(14);
+                doc.text('Coaching Areas', 20, yPosition);
+                yPosition += 10;
+                
+                doc.setFontSize(10);
+                userSkills.coaching.forEach(skill => {
+                    doc.text(`• ${skill}`, 25, yPosition);
+                    yPosition += 7;
+                });
+                yPosition += 5;
+            }
+            
+            // OJT
+            if (userSkills.ojt.length > 0) {
+                doc.setFontSize(14);
+                doc.text('On-the-Job Training', 20, yPosition);
+                yPosition += 10;
+                
+                doc.setFontSize(10);
+                userSkills.ojt.forEach(skill => {
+                    doc.text(`• ${skill}`, 25, yPosition);
+                    yPosition += 7;
+                });
+            }
+            
+            // Save the PDF
+            doc.save(`${user.name}_Development_Plan.pdf`);
+        }
+        
+        function generateManagerPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const users = getUsers();
+            const skills = getSkills();
+            const managerRecs = getManagerRecs();
+            const teamMembers = users[currentUser].subordinates || [];
+            const manager = users[currentUser];
+            
+            // Title
+            doc.setFontSize(20);
+            doc.text('Team Development Plan', 105, 15, { align: 'center' });
+            
+            // Manager Info
+            doc.setFontSize(12);
+            doc.text(`Manager: ${manager.name}`, 20, 30);
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 40);
+            doc.text(`Team Size: ${teamMembers.length} employees`, 20, 50);
+            
+            let yPosition = 70;
+            
+            if (teamMembers.length === 0) {
+                doc.text('No team members assigned.', 20, yPosition);
+            } else {
+                teamMembers.forEach(memberId => {
+                    const member = users[memberId];
+                    const userSkills = skills[memberId] || { jobSkills: { technical: [], soft: [] } };
+                    const userRecs = managerRecs[currentUser]?.[memberId] || { skills: [], coaching: [], ojt: [] };
+                    
+                    // Check if member has any data
+                    const hasData = userSkills.jobSkills.technical.length > 0 || 
+                                   userSkills.jobSkills.soft.length > 0 ||
+                                   userSkills.personalSkills.length > 0 ||
+                                   userSkills.coaching.length > 0 ||
+                                   userSkills.ojt.length > 0 ||
+                                   userRecs.skills.length > 0 ||
+                                   userRecs.coaching.length > 0 ||
+                                   userRecs.ojt.length > 0;
+                    
+                    if (!hasData) return;
+                    
+                    // Member header
+                    doc.setFontSize(14);
+                    doc.setTextColor(0, 0, 128);
+                    doc.text(`Employee: ${member.name}`, 20, yPosition);
+                    yPosition += 10;
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(0, 0, 0);
+                    
+                    // Job Skills
+                    if (userSkills.jobSkills.technical.length > 0 || userSkills.jobSkills.soft.length > 0) {
+                        doc.text('Job Skills:', 25, yPosition);
+                        yPosition += 7;
+                        
+                        userSkills.jobSkills.technical.forEach(skill => {
+                            doc.text(`  • Technical: ${skill}`, 30, yPosition);
+                            yPosition += 7;
+                        });
+                        
+                        userSkills.jobSkills.soft.forEach(skill => {
+                            doc.text(`  • Soft Skill: ${skill}`, 30, yPosition);
+                            yPosition += 7;
+                        });
+                    }
+                    
+                    // Manager Recommendations for Skills
+                    if (userRecs.skills.length > 0) {
+                        doc.setTextColor(255, 0, 0);
+                        doc.text('  Manager Recommendations:', 30, yPosition);
+                        yPosition += 7;
+                        
+                        userRecs.skills.forEach(skill => {
+                            doc.text(`    • ${skill}`, 35, yPosition);
+                            yPosition += 7;
+                        });
+                        doc.setTextColor(0, 0, 0);
+                    }
+                    
+                    yPosition += 5;
+                    
+                    // Add new page if needed
+                    if (yPosition > 270) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                });
+            }
+            
+            // Save the PDF
+            doc.save(`${manager.name}_Team_Development_Plan.pdf`);
+        }
+        
+        // CSV Generation - FIXED VERSION
+        document.getElementById('generate-csv').addEventListener('click', generateEmployeeCSV);
+        document.getElementById('generate-team-csv').addEventListener('click', generateManagerCSV);
+        
+        function generateEmployeeCSV() {
+            const skills = getSkills();
+            const userSkills = skills[currentUser] || {
+                jobSkills: { technical: [], soft: [] },
+                personalSkills: [],
+                coaching: [],
+                ojt: []
+            };
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Category,Skill Type,Skill\n";
+            
+            // Job Skills
+            userSkills.jobSkills.technical.forEach(skill => {
+                csvContent += `Job Skills,Technical,${skill}\n`;
+            });
+            
+            userSkills.jobSkills.soft.forEach(skill => {
+                csvContent += `Job Skills,Soft Skills,${skill}\n`;
+            });
+            
+            // Personal Skills
+            userSkills.personalSkills.forEach(skill => {
+                csvContent += `Personal Skills,Personal Development,${skill}\n`;
+            });
+            
+            // Coaching
+            userSkills.coaching.forEach(skill => {
+                csvContent += `Coaching,Coaching Areas,${skill}\n`;
+            });
+            
+            // OJT
+            userSkills.ojt.forEach(skill => {
+                csvContent += `On-the-Job Training,OJT Requirements,${skill}\n`;
+            });
+            
+            // If no data, add a placeholder
+            if (csvContent === "data:text/csv;charset=utf-8,Category,Skill Type,Skill\n") {
+                csvContent += "No skills added yet.,,\n";
+            }
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "employee_development_plan.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        function generateManagerCSV() {
+            const users = getUsers();
+            const skills = getSkills();
+            const managerRecs = getManagerRecs();
+            const teamMembers = users[currentUser].subordinates || [];
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Employee,Category,Skill Type,Skill,Source\n";
+            
+            if (teamMembers.length === 0) {
+                csvContent += "No team members assigned.,,,\n";
+            } else {
+                teamMembers.forEach(memberId => {
+                    const member = users[memberId];
+                    const userSkills = skills[memberId] || { jobSkills: { technical: [], soft: [] } };
+                    const userRecs = managerRecs[currentUser]?.[memberId] || { skills: [], coaching: [], ojt: [] };
+                    
+                    // Job Skills
+                    userSkills.jobSkills.technical.forEach(skill => {
+                        csvContent += `${member.name},Job Skills,Technical,${skill},Employee\n`;
+                    });
+                    
+                    userSkills.jobSkills.soft.forEach(skill => {
+                        csvContent += `${member.name},Job Skills,Soft Skills,${skill},Employee\n`;
+                    });
+                    
+                    // Manager Recommendations for Skills
+                    userRecs.skills.forEach(skill => {
+                        csvContent += `${member.name},Job Skills,Technical,${skill},Manager\n`;
+                    });
+                    
+                    // Personal Skills
+                    userSkills.personalSkills.forEach(skill => {
+                        csvContent += `${member.name},Personal Skills,Personal Development,${skill},Employee\n`;
+                    });
+                    
+                    // Coaching
+                    userSkills.coaching.forEach(skill => {
+                        csvContent += `${member.name},Coaching,Coaching Areas,${skill},Employee\n`;
+                    });
+                    
+                    userRecs.coaching.forEach(skill => {
+                        csvContent += `${member.name},Coaching,Coaching Areas,${skill},Manager\n`;
+                    });
+                    
+                    // OJT
+                    userSkills.ojt.forEach(skill => {
+                        csvContent += `${member.name},On-the-Job Training,OJT Requirements,${skill},Employee\n`;
+                    });
+                    
+                    userRecs.ojt.forEach(skill => {
+                        csvContent += `${member.name},On-the-Job Training,OJT Requirements,${skill},Manager\n`;
+                    });
+                });
+            }
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "team_development_plan.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Utility function to show messages
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `message ${type}`;
+            
+            // Clear message after 3 seconds
+            setTimeout(() => {
+                element.textContent = '';
+                element.className = 'message';
+            }, 3000);
+        }
+        
+        // Print functionality
+        document.getElementById('print-report').addEventListener('click', () => {
+            window.print();
+        });
+        
+        document.getElementById('print-team-report').addEventListener('click', () => {
+            window.print();
+        });
+    </script>
+</body>
+</html>
